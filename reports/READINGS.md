@@ -67,3 +67,16 @@ refusal; otherwise it is accepted. "Accepted" has no definition of its own
 in the text beyond line 693, so accepted means: not rejected and nothing
 left open.
 
+
+## R03 - An absent qualifier reads as unknown
+
+Quoted: "The two qualifiers and their default are Evgenii's: unknown on
+both, and no value is assertable without the artifact that carries it."
+(line 136).
+
+Readings: (a) a record without the `other-verdict` or `discrimination` key
+has that qualifier at its default, unknown; (b) a missing qualifier is a
+malformed record.
+
+Taken: (a). The text names the default; a default needs no writing.
+
