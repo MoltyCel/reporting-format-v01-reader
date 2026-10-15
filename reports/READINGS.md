@@ -137,3 +137,15 @@ Taken: (a). Line 137 says "no value", with unknown named as the default;
 the grammar does not decide it, since foreclosed carries no <ref> in the
 grammar and still needs one by row 11.
 
+
+## R07 - Row 5: what a declared exclusion is
+
+Quoted: "5 a declared exclusion with any state but not-exercised"
+(line 276); "\"Declared\" means written by the emitter." (line 45).
+
+Readings: (a) a record carrying `declared-exclusion: true`; (b) also any
+record whose cause is out_of_scope.
+
+Taken: (a). out_of_scope is a cause, and causes are read by rows 1 to 4;
+nothing says a cause value is an exclusion.
+
