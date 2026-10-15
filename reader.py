@@ -23,11 +23,8 @@ CITES = {
     "row2": (272, "void with not_applicable, out_of_scope or withheld"),
 }
 
-# Numbered rows of section 4, keyed by citation name.
-ROW_NUMBER = {
-    "row1": 1,
-    "row2": 2,
-}
+# Numbered rows of section 4: citation names "row<n>".
+ROW_NUMBER = dict((name, int(name[3:])) for name in CITES if name.startswith("row"))
 
 
 def flatten(text):
