@@ -225,3 +225,24 @@ Neither between (a) and (b): where (b) would fire and (a) would not, the
 member is cannot-tell under R12. Where (b) would not fire, both agree and
 the member is not refused on that ground.
 
+
+## R13 - Line 164: which moved must be contained in compared
+
+Quoted: "moved is recomputed, not declared. It is recomputed over what the
+referenced observations actually contain, and an object whose moved is not
+contained in its declared compared set is rejected." (lines 163-165);
+"It also makes visible an emitter reporting a difference in something it
+says it did not look at." (line 168); "So what the record composes is
+currently settled by the emitter, not by the format" (line 587); "v0.1
+does not settle it" (line 575).
+
+Readings: (a) "its moved" is the recomputed moved, the one just described;
+(b) it is the moved the emitter declared, which line 168 can be read as
+pointing at; (c) both. Section 7.1 records that the 42 published objects
+declare moving the error list, which has no compared value, and leaves what
+the record composes open (O1).
+
+Taken where both agree: reject when the recomputed and the declared moved
+both escape compared; no ground when both are contained. Neither where they
+disagree: such a member is cannot-tell under R13.
+
