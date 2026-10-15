@@ -29,6 +29,8 @@ CITES = {
     "fillings": (396, "the report says so and names what the producer has instead"),
     "failstate": (405, "\"Fail\" here is the state fail, in all three places. A non-pass is not enough"),
     "controlstate": (416, "control-failed requires the control's state to be fail"),
+    "controlpop": (427, "The control is the run's declared checks exercised against an input built to fail them, not a separate check beside them"),
+    "binding": (431, "The control runs under the same checker revision and the same relevant configuration and constraints as the declared checks"),
     "silence": (421, "\"Nothing\" is a permitted answer. Silence in that field is not"),
     "leafcount": (229, "A digest match establishes a set only when the count of leaves is bound into what is signed or hashed"),
     "mustshape": (230, "a report MUST declare which tree shape it uses"),
@@ -369,6 +371,16 @@ def read_negative(run, found):
             control = {}
         if control.get("state") != "fail":
             found.refuse("controlstate", "the control's state is %s, not fail" % json.dumps(control.get("state")))
+        named = control.get("checks")
+        declared = [r.get("check") for r in run.records]
+        if isinstance(named, list) and any(c not in declared for c in named):
+            found.leave_open("R21", "controlpop", "the control names a check that is not a declared check")
+        ours, theirs = run.subject.get("fixed"), control.get("fixed")
+        if isinstance(ours, dict) and isinstance(theirs, dict):
+            for key in sorted(set(ours) & set(theirs)):
+                if ours[key] != theirs[key]:
+                    found.leave_open("R21", "binding", "the control ran under %s %s, the run under %s" % (
+                        key, json.dumps(theirs[key]), json.dumps(ours[key])))
     elif kind not in ("nothing", "shown-by-run", "control-failed", "prior-discriminating-run"):
         found.leave_open("R20", "fillings", "the roll-up names %s, not one of the fillings" % json.dumps(kind))
 
