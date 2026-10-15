@@ -448,3 +448,14 @@ What it counts (verdict records, line 377, or observations) is also not
 settled, so the reader neither judges it nor lets it affect a verdict; it
 emits its own recount of carried and referenced observations as data.
 
+
+## R25 - Values outside the closed vocabularies
+
+Quoted: "state pass | fail | not-exercised | inconclusive | void" (line 54);
+"discrimination unknown | demonstrated(<evidence ref>)" (line 60); the
+other-verdict list (lines 57-59).
+
+A state, other-verdict value or discrimination value outside its list, or a
+qualifier `ref` naming no evidence object of the report, has no row.
+Neither: cannot-tell under R25. (Causes are R04.)
+
