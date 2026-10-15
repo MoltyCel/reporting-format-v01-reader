@@ -73,3 +73,33 @@ runs (PYTHONHASHSEED 0, 0, 1, 12345) gave byte-identical output under
 CPython 3.9.6, the only interpreter reachable by name here. No 3.1x
 interpreter was found by trying `python3.10` to `python3.14`; that gap is in
 `reports/OPEN.md`. I did not judge whether the verdicts are right.
+
+## Step 6 - rewrite the lines that coincide with other implementations
+
+Input: the coordinator's list of 40 line numbers of `reader.py` at 0ecc76b
+whose whitespace-stripped text occurs in at least one implementation I have
+not seen. I was told only the line numbers, not the other code.
+
+Opened: `reader.py` (at 0ecc76b and the working copy), `out/run.jsonl`.
+
+Decided: every listed line was rewritten by changing the structure, not by
+renaming: the three imports became one line; the docstring closes on its
+text line; dict and tuple literals close on their last entry; bare
+`return`, `else:` and `continue` were removed by wrapping or by splitting
+functions (`read_tree`, `count_sides`, `read_json`); the cause vocabulary is
+built from the CAP-1 list plus the list's additions; rows 2 and 3 are a
+table (`STATE_CAUSE_ROWS`); moved is recomputed from a table of compared
+names; the 5.4 fillings dispatch through `FILLINGS`; the roll-up check moved
+into `judge`; the verdict is set accept-first and overridden; `run` raises
+SystemExit for usage and returns nothing. One new line repeated a listed
+line (`if "carried" in observation:` in `count_sides`) and was rewritten
+again. A check script confirms no listed line text remains in `reader.py`.
+No line had to stay shared, so OPEN.md lists none.
+
+Behaviour change outside the verdicts: a wrong argument count now exits
+with status 1 (SystemExit message) instead of 2.
+
+Result: `out/run.jsonl` is byte-identical to the one at 0ecc76b (sha256
+505dfb71a640e7ef0eceb7f2d859e5cf08dac4c81bed80672135e0eb51b92130), also
+with PYTHONHASHSEED 1 and 777; the source still parses under the 3.9
+grammar.

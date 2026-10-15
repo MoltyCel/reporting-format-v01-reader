@@ -24,3 +24,8 @@ something outside would have settled a reading. None of them was consulted.
    name on this machine; the reader was run under it and its source was
    parsed with the 3.9 grammar. It uses no version-dependent behaviour I
    know of, but the byte-identity claim across versions is untested here.
+
+## Lines that stay shared
+
+None. Every line listed after 0ecc76b was rewritten (see STEPS.md step 6).
+New lines may coincide again; that has not been checked yet.

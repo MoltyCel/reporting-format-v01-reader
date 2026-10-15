@@ -5,12 +5,9 @@ reports/READINGS.md (ids R01..R26).  Usage:
 
     python3 -I reader.py <directory of member files>
 
-One JSON line per member on stdout, in id order; one summary line on stderr.
-"""
+One JSON line per member on stdout, in id order; one summary line on stderr."""
 
-import json
-import os
-import sys
+import json, os, sys
 
 SPEC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec", "v01-text.txt")
 
@@ -55,8 +52,7 @@ CITES = {
     "row12": (288, "discrimination demonstrated citing an evidence object whose changed slot is the checker"),
     "row13": (294, "other-verdict demonstrated citing an evidence object whose moved does not contain the verdict"),
     "row14": (296, "moved asserted on an evidence object that neither carries both observations nor references them with digests"),
-    "row11": (286, "an asserted value without its evidence reference, on either field, foreclosed included"),
-}
+    "row11": (286, "an asserted value without its evidence reference, on either field, foreclosed included")}
 
 # Numbered rows of section 4: citation names "row<n>".
 ROW_NUMBER = dict((name, int(name[3:])) for name in CITES if name.startswith("row"))
@@ -68,11 +64,11 @@ def flatten(text):
 
 def verify_cites():
     """Fail loudly if a quotation does not start on the line it cites."""
-    if not os.path.isfile(SPEC):
-        return
-    with open(SPEC, encoding="utf-8") as handle:
-        lines = handle.read().split("\n")
-    for name in sorted(CITES):
+    lines = []
+    if os.path.isfile(SPEC):
+        with open(SPEC, encoding="utf-8") as handle:
+            lines = handle.read().split("\n")
+    for name in sorted(CITES) if lines else []:
         start, words = CITES[name]
         here = flatten(" ".join(lines[start - 1:start + 7]))
         later = flatten(" ".join(lines[start:start + 7]))
@@ -90,13 +86,10 @@ class Verdict:
         self.recount = {}
 
     def refuse(self, cite, reason):
-        if cite in ROW_NUMBER:
-            key = (0, ROW_NUMBER[cite])
-        elif cite == "runlevel":
-            key = (1, 0)
-        else:
-            key = (2, CITES[cite][0])
-        self.refusals.append((key, cite, reason))
+        # R26: numbered rows first, then the run-level rejection, then sentences.
+        rank = (0, ROW_NUMBER[cite]) if cite in ROW_NUMBER else (
+            (1, 0) if cite == "runlevel" else (2, CITES[cite][0]))
+        self.refusals.append((rank, cite, reason))
 
     def leave_open(self, reading, cite, reason):
         self.unsettled.append((reading, cite, reason))
@@ -115,14 +108,12 @@ def describe(cite, reason, reading=None):
 
 
 STATES = ("pass", "fail", "not-exercised", "inconclusive", "void")
-VERDICT_STATES = ("pass", "fail")
+VERDICT_STATES = STATES[:2]  # pass and fail, the two verdict states
 
 
 def records_of(subject):
     items = subject.get("checks")
-    if not isinstance(items, list):
-        return []
-    return [r for r in items if isinstance(r, dict)]
+    return [r for r in items if isinstance(r, dict)] if isinstance(items, list) else []
 
 
 def label(record, index):
@@ -130,12 +121,11 @@ def label(record, index):
 
 
 # 1.2: the eight CAP-1 dispositions, then the values added on the list.
-CAUSES = (
-    "not_applicable", "disabled_by_policy", "unsupported_input",
-    "resource_exhausted", "failed", "unavailable", "out_of_scope", "withheld",
-    "evidence-does-not-hold", "integrity-failure", "precondition-unsatisfiable",
-    "confinement-failed-during-check",
-)
+CAP1_DISPOSITIONS = ("not_applicable disabled_by_policy unsupported_input resource_exhausted"
+                     " failed unavailable out_of_scope withheld").split()
+LIST_ADDITIONS = ["evidence-does-not-hold", "integrity-failure",
+                  "precondition-unsatisfiable", "confinement-failed-during-check"]
+CAUSES = tuple(CAP1_DISPOSITIONS + LIST_ADDITIONS)
 UNSETTLED_CAUSES = ("availability-failure",)
 
 
@@ -161,7 +151,8 @@ def qualifier(record, field, allowed, cite, name, found):
     if not isinstance(body, dict):
         body = {"value": body}
     value = body.get("value")
-    if value not in allowed:
+    listed = value in allowed
+    if not listed:
         found.leave_open("R25", cite, "%s has %s %s, outside the list" % (
             name, field, json.dumps(value)))
     return True, value, body
@@ -236,7 +227,8 @@ class Run:
 
 def look(observation, store):
     """Section 3 table for one observation: ("read", content), "unresolved" or "mismatch"."""
-    if "carried" in observation:
+    side = "carried" if "carried" in observation else "reference"
+    if side == "carried":
         content = observation["carried"]
         return ("read", content) if isinstance(content, dict) else ("unresolved", None)
     ref = observation.get("reference")
@@ -263,19 +255,17 @@ def recompute(item, store):
     if "unresolved" in outcomes:
         return "unresolved", None
     first, second = looked[0][1], looked[1][1]
-    moved = set()
-    if first.get("verdict") != second.get("verdict"):
-        moved.add("verdict")
-    if first.get("rules") != second.get("rules"):
-        moved.add("fired-rule list")
-    return "read", moved
+    # R09: compared names for the two things an observation holds
+    terms = (("verdict", "verdict"), ("fired-rule list", "rules"))
+    return "read", set(term for term, key in terms if first.get(key) != second.get(key))
 
 
 def domain_slot(value, where, run, found):
-    if not isinstance(value, str):
+    identifier = isinstance(value, str)
+    if not identifier:
         found.leave_open("R17", "domain", "%s writes the domain as %s, not an identifier" % (
             where, json.dumps(value, sort_keys=True)))
-    elif value != run.domain:
+    if identifier and value != run.domain:
         found.leave_open("R17", "domain", "%s names domain %s, the run's is %s" % (
             where, value, json.dumps(run.domain)))
 
@@ -292,11 +282,11 @@ def read_evidence(item, run, found):
     if "changed" in item and item["changed"] not in CHANGED_VALUES:
         found.leave_open("R19", "slots", "%s has changed %s" % (where, json.dumps(item["changed"])))
     fixed = item.get("fixed")
-    if "fixed" in item:
-        if not isinstance(fixed, dict) or any(k not in fixed for k in FIXED_NAMES):
-            found.leave_open("R19", "fixedslot", "%s does not name checker, constraint set and domain" % where)
-        else:
-            domain_slot(fixed["domain"], "%s fixed slot" % where, run, found)
+    names_all = isinstance(fixed, dict) and all(k in fixed for k in FIXED_NAMES)
+    if "fixed" in item and not names_all:
+        found.leave_open("R19", "fixedslot", "%s does not name checker, constraint set and domain" % where)
+    if names_all:
+        domain_slot(fixed["domain"], "%s fixed slot" % where, run, found)
     if "compared" in item and not isinstance(item["compared"], list):
         found.leave_open("R19", "slots", "%s has no compared list" % where)
     delta = item.get("delta")
@@ -343,8 +333,11 @@ TREE_SHAPES = ("flat", "rfc6962", "RFC9162_SHA256")
 
 def read_collection(run, found):
     collection = run.subject.get("check-set")
-    if not isinstance(collection, dict):
-        return
+    if isinstance(collection, dict):
+        read_tree(collection, run, found)
+
+
+def read_tree(collection, run, found):
     shape = collection.get("tree-shape")
     if "tree-shape" not in collection:
         found.refuse("mustshape", "the check-set digest declares no tree shape")
@@ -363,23 +356,18 @@ CLAIM_POPULATIONS = {
     "accounting": "declared checks",
     "execution": "declared checks",
     "evidence": "verdict records",
-    "no-void": "declared checks",
-}
+    "no-void": "declared checks"}
 
 
 def read_claims(run, rollup, found):
     claims = rollup.get("completeness")
-    if not isinstance(claims, dict):
-        return
-    sizes = {
-        "declared checks": len(run.records),
-        "verdict records": sum(1 for r in run.records if r.get("state") in VERDICT_STATES),
-    }
-    for name in sorted(claims):
+    claims = claims if isinstance(claims, dict) else {}
+    sizes = {"declared checks": len(run.records),
+             "verdict records": sum(1 for r in run.records if r.get("state") in VERDICT_STATES)}
+    for name in sorted(set(claims) - set(CLAIM_POPULATIONS)):
+        found.leave_open("R23", "claims", "the roll-up makes a claim %s the text does not name" % json.dumps(name))
+    for name in sorted(set(claims) & set(CLAIM_POPULATIONS)):
         claim = claims[name] if isinstance(claims[name], dict) else {}
-        if name not in CLAIM_POPULATIONS:
-            found.leave_open("R23", "claims", "the roll-up makes a claim %s the text does not name" % json.dumps(name))
-            continue
         size = sizes[CLAIM_POPULATIONS[name]]
         count = claim.get("population")
         if not isinstance(count, int) or isinstance(count, bool):
@@ -408,51 +396,73 @@ def read_counts(run, rollup, found):
                 key, json.dumps(rollup[key]), recount[key]))
 
 
-def read_negative(run, found):
-    rollup = run.subject.get("roll-up")
-    if not isinstance(rollup, dict):
-        found.leave_open("R24", "aggregate", "the report has no roll-up")
-        return
+def by_run(run, field, found):
+    if not any(r.get("state") == "fail" for r in run.records):
+        found.refuse("failstate", "the roll-up claims shown-by-run but no check record is in state fail")
+
+
+def by_control(run, field, found):
+    control = field.get("control")
+    if not isinstance(control, dict):
+        control = {}
+    if control.get("state") != "fail":
+        found.refuse("controlstate", "the control's state is %s, not fail" % json.dumps(control.get("state")))
+    named = control.get("checks")
+    declared = [r.get("check") for r in run.records]
+    if isinstance(named, list) and any(c not in declared for c in named):
+        found.leave_open("R21", "controlpop", "the control names a check that is not a declared check")
+    ours, theirs = run.subject.get("fixed"), control.get("fixed")
+    if isinstance(ours, dict) and isinstance(theirs, dict):
+        for key in sorted(set(ours) & set(theirs)):
+            if ours[key] != theirs[key]:
+                found.leave_open("R21", "binding", "the control ran under %s %s, the run under %s" % (
+                    key, json.dumps(theirs[key]), json.dumps(ours[key])))
+
+
+PRIOR_NOTES = {
+    "unresolved": "prior run does not resolve: unchecked, not discriminating power, not a refusal (R22)",
+    "read": "prior run resolves with a matching digest; its content is not read (R22)"}
+
+
+def by_prior(run, field, found):
+    outcome, _ = look({"reference": field.get("reference")}, run.store)
+    if outcome == "mismatch":
+        found.leave_open("R11", "mismatch", "the prior run's reference resolves with a different digest")
+    if outcome in PRIOR_NOTES:
+        found.note(PRIOR_NOTES[outcome])
+
+
+# 5.4: the fillings the text names (R01, R20); "nothing" needs no check.
+FILLINGS = {
+    "nothing": None,
+    "shown-by-run": by_run,
+    "control-failed": by_control,
+    "prior-discriminating-run": by_prior}
+
+
+def read_negative(run, rollup, found):
     read_claims(run, rollup, found)
     read_counts(run, rollup, found)
     field = rollup.get("negative-capable")
     kind = field.get("kind") if isinstance(field, dict) else None
     if kind is None:
         found.refuse("silence", "the roll-up does not say whether its checks could produce a negative verdict")
-    elif kind == "shown-by-run":
-        if not any(r.get("state") == "fail" for r in run.records):
-            found.refuse("failstate", "the roll-up claims shown-by-run but no check record is in state fail")
-    elif kind == "control-failed":
-        control = field.get("control")
-        if not isinstance(control, dict):
-            control = {}
-        if control.get("state") != "fail":
-            found.refuse("controlstate", "the control's state is %s, not fail" % json.dumps(control.get("state")))
-        named = control.get("checks")
-        declared = [r.get("check") for r in run.records]
-        if isinstance(named, list) and any(c not in declared for c in named):
-            found.leave_open("R21", "controlpop", "the control names a check that is not a declared check")
-        ours, theirs = run.subject.get("fixed"), control.get("fixed")
-        if isinstance(ours, dict) and isinstance(theirs, dict):
-            for key in sorted(set(ours) & set(theirs)):
-                if ours[key] != theirs[key]:
-                    found.leave_open("R21", "binding", "the control ran under %s %s, the run under %s" % (
-                        key, json.dumps(theirs[key]), json.dumps(ours[key])))
-    elif kind == "prior-discriminating-run":
-        outcome, _ = look({"reference": field.get("reference")}, run.store)
-        if outcome == "mismatch":
-            found.leave_open("R11", "mismatch", "the prior run's reference resolves with a different digest")
-        elif outcome == "unresolved":
-            found.note("prior run does not resolve: unchecked, not discriminating power, not a refusal (R22)")
-        else:
-            found.note("prior run resolves with a matching digest; its content is not read (R22)")
-    elif kind not in ("nothing", "shown-by-run", "control-failed", "prior-discriminating-run"):
+    elif kind not in FILLINGS:
         found.leave_open("R20", "fillings", "the roll-up names %s, not one of the fillings" % json.dumps(kind))
+    elif FILLINGS[kind] is not None:
+        FILLINGS[kind](run, field, found)
+
+
+# Rows 2 and 3: a state written with a cause it may not carry.
+STATE_CAUSE_ROWS = (
+    ("row2", "void", ("not_applicable", "out_of_scope", "withheld"), "%(name)s is void with cause %(code)s"),
+    ("row3", "not-exercised", ("integrity-failure",), "%(name)s is not-exercised with integrity-failure"))
 
 
 def read_record(record, name, run, found):
     state = record.get("state")
-    if state not in STATES:
+    known_state = state in STATES
+    if not known_state:
         found.leave_open("R25", "states", "%s has state %s, outside the list" % (
             name, json.dumps(state)))
     written, code = cause_code(record)
@@ -462,13 +472,12 @@ def read_record(record, name, run, found):
         found.refuse("freetext", "%s gives cause %s, not a disposition" % (
             name, json.dumps(code)))
     has_cause = written and (code in CAUSES or code in UNSETTLED_CAUSES)
-    resting = state in STATES and state not in VERDICT_STATES
+    resting = known_state and state not in VERDICT_STATES
     if resting and not has_cause:
         found.refuse("row1", "%s is %s with no cause from the vocabulary" % (name, state))
-    if state == "void" and code in ("not_applicable", "out_of_scope", "withheld"):
-        found.refuse("row2", "%s is void with cause %s" % (name, code))
-    if state == "not-exercised" and code == "integrity-failure":
-        found.refuse("row3", "%s is not-exercised with integrity-failure" % name)
+    for row, bad_state, bad_codes, wording in STATE_CAUSE_ROWS:
+        if state == bad_state and code in bad_codes:
+            found.refuse(row, wording % {"name": name, "code": code})
     if code == "confinement-failed-during-check" and state != "void":
         found.refuse("row4", "%s is %s with confinement-failed-during-check" % (name, state))
     if record.get("declared-exclusion") is True and state != "not-exercised":
@@ -493,17 +502,28 @@ def judge(member):
         read_record(record, label(record, index), run, found)
     for key in sorted(run.evidence, key=str):
         read_evidence(run.evidence[key], run, found)
-    carried = referenced = 0
+    found.recount = count_sides(run)
+    read_collection(run, found)
+    rollup = run.subject.get("roll-up")
+    if isinstance(rollup, dict):
+        read_negative(run, rollup, found)
+    if not isinstance(rollup, dict):
+        found.leave_open("R24", "aggregate", "the report has no roll-up")
+    return found
+
+
+def count_sides(run):
+    """R24: the reader's own count of carried and referenced observations."""
+    sides = {"carried": 0, "referenced": 0}
     for item in run.evidence.values():
         for observation in item.get("observations") or []:
-            if isinstance(observation, dict) and "carried" in observation:
-                carried += 1
-            elif isinstance(observation, dict) and "reference" in observation:
-                referenced += 1
-    found.recount = {"carried": carried, "referenced": referenced}
-    read_collection(run, found)
-    read_negative(run, found)
-    return found
+            if not isinstance(observation, dict):
+                observation = {}
+            side = "carried" if "carried" in observation else (
+                "referenced" if "reference" in observation else None)
+            if side is not None:
+                sides[side] += 1
+    return sides
 
 
 def render(member_id, found):
@@ -514,47 +534,40 @@ def render(member_id, found):
         "grounds": [describe(c, r) for _, c, r in refusals],
         "open": sorted(set(r for r, _, _ in unsettled)),
         "notes": sorted(set(found.notes)),
-        "recount": found.recount,
-    }
+        "recount": found.recount}
+    # R02, R26: a refusal decides; else an open reading; else accept.
+    line["verdict"], line["ground"] = "accept", "; ".join(line["notes"])
+    if unsettled and not refusals:
+        reading, cite, reason = unsettled[0]
+        line["verdict"], line["ground"] = "cannot-tell", describe(cite, reason, reading)
     if refusals:
         _, cite, reason = refusals[0]
-        line["verdict"] = "reject"
-        line["ground"] = describe(cite, reason)
-    elif unsettled:
-        reading, cite, reason = unsettled[0]
-        line["verdict"] = "cannot-tell"
-        line["ground"] = describe(cite, reason, reading)
-    else:
-        line["verdict"] = "accept"
-        line["ground"] = "; ".join(line["notes"])
+        line["verdict"], line["ground"] = "reject", describe(cite, reason)
     return line
 
 
 def load(directory):
-    members = []
-    for name in sorted(os.listdir(directory)):
-        if not name.endswith(".json"):
-            continue
-        with open(os.path.join(directory, name), encoding="utf-8") as handle:
-            members.append(json.load(handle))
-    members.sort(key=lambda m: str(m.get("id")))
-    return members
+    files = sorted(n for n in os.listdir(directory) if n.endswith(".json"))
+    parsed = [read_json(os.path.join(directory, n)) for n in files]
+    return sorted(parsed, key=lambda m: str(m.get("id")))
+
+
+def read_json(path):
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 def run(argv):
     if len(argv) != 1:
-        sys.stderr.write("usage: python3 -I reader.py <members directory>\n")
-        return 2
+        raise SystemExit("usage: python3 -I reader.py <members directory>")
     verify_cites()
     tally = {"accept": 0, "reject": 0, "cannot-tell": 0}
-    members = load(argv[0])
-    for member in members:
+    for member in load(argv[0]):
         line = render(str(member.get("id")), judge(member))
         tally[line["verdict"]] += 1
         sys.stdout.write(json.dumps(line, sort_keys=True, ensure_ascii=True) + "\n")
     sys.stderr.write("members=%d accept=%d reject=%d cannot-tell=%d\n" % (
-        len(members), tally["accept"], tally["reject"], tally["cannot-tell"]))
-    return 0
+        sum(tally.values()), tally["accept"], tally["reject"], tally["cannot-tell"]))
 
 
-sys.exit(run(sys.argv[1:]))
+run(sys.argv[1:])
