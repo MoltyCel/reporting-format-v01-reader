@@ -466,7 +466,9 @@ Quoted: "\"Rejected\" means a conforming validator refuses the object and
 names the row that refused it." (line 44); "A rejection vector names the
 row that rejected it" (line 331).
 
-Taken: when any ground of R02 (b) fires, the member is rejected and the
-first ground in text order is named, even if other points of the same
-member are open; all grounds found are also listed. A refusal does not
+Taken: when any ground of R02 (b) fires, the member is rejected, even if
+other points of the same member are open; all grounds found are listed.
+The ground named first is the lowest numbered row of section 4 that fires,
+since line 44 asks for a row; failing a numbered row, the run-level
+rejection; failing that, the first refusing sentence in text order. A refusal does not
 wait on the outcome of an unrelated open reading.
