@@ -28,6 +28,7 @@ CITES = {
     "row5": (276, "a declared exclusion with any state but not-exercised"),
     "row6": (278, "a non-verdict state carrying either qualifier"),
     "row7": (279, "a verdict state carrying a cause"),
+    "row8": (280, "other-verdict foreclosed with discrimination demonstrated"),
 }
 
 # Numbered rows of section 4: citation names "row<n>".
@@ -148,6 +149,8 @@ def read_qualifiers(record, name, state, found):
             elif written:
                 found.leave_open("R05", "row6", "%s is %s and writes %s as unknown" % (
                     name, state, field))
+    if other[1] == "foreclosed" and disc[1] == "demonstrated":
+        found.refuse("row8", "%s: other-verdict foreclosed beside discrimination demonstrated" % name)
 
 
 def read_record(record, name, found):
