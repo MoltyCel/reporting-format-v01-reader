@@ -17,6 +17,8 @@ SPEC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec", "v01-tex
 # Each citation: (first line in spec/v01-text.txt, words quoted from there on).
 CITES = {
     "states": (54, "state pass | fail | not-exercised | inconclusive | void"),
+    "othervalues": (57, "other-verdict unknown | possible-not-demonstrated |"),
+    "discvalues": (60, "discrimination unknown | demonstrated(<evidence ref>)"),
     "freetext": (110, "Free text is refused in place of a disposition"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
     "row1": (271, "a non-verdict state with no cause"),
@@ -117,6 +119,29 @@ def cause_code(record):
     return True, cause
 
 
+OTHER_VALUES = ("unknown", "possible-not-demonstrated", "demonstrated", "foreclosed")
+DISCRIMINATION_VALUES = ("unknown", "demonstrated")
+
+
+def qualifier(record, field, allowed, cite, name, found):
+    """Return (written, value, body); a qualifier not written is unknown (R03)."""
+    if field not in record:
+        return False, "unknown", {}
+    body = record[field]
+    if not isinstance(body, dict):
+        body = {"value": body}
+    value = body.get("value")
+    if value not in allowed:
+        found.leave_open("R25", cite, "%s has %s %s, outside the list" % (
+            name, field, json.dumps(value)))
+    return True, value, body
+
+
+def read_qualifiers(record, name, state, found):
+    other = qualifier(record, "other-verdict", OTHER_VALUES, "othervalues", name, found)
+    disc = qualifier(record, "discrimination", DISCRIMINATION_VALUES, "discvalues", name, found)
+
+
 def read_record(record, name, found):
     state = record.get("state")
     if state not in STATES:
@@ -142,6 +167,7 @@ def read_record(record, name, found):
         found.refuse("row5", "%s is a declared exclusion in state %s" % (name, state))
     if state in VERDICT_STATES and written:
         found.refuse("row7", "%s is %s and carries a cause" % (name, state))
+    read_qualifiers(record, name, state, found)
 
 
 def judge(member):
