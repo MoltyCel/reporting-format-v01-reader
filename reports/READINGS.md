@@ -262,3 +262,26 @@ Taken: (a). Row 14 is a form row "decidable from the object alone"
 205-207 also speak of the object staying with its corpus or leaving it,
 not of single observations.
 
+
+## R15 - The tree-shape declaration and its set
+
+Quoted: "a report MUST declare which tree shape it uses" (line 230);
+"The declaration is an identifier from a closed, versioned set of tree
+construction and hash identifiers, not free text" (line 240); "Sankalp's
+corpus already fixes tree shape as a closed set of two, flat and rfc6962"
+(line 251); "the set need not disallow that identifier" (line 249);
+"The v0.1 set is the members that have a vector pair in the corpus section
+10 cites; see O3." (line 253); section 10 cites "<open, O2>" (line 694);
+0.13.0, the only candidate named (line 704), carries "RFC9162_SHA256 joins
+flat and rfc6962 as a tree shape" (line 749).
+
+Readings for RFC9162_SHA256: (a) a member, since every corpus the text
+names as candidate carries it and 3.1 says the set need not disallow it;
+(b) not settled, since the cited corpus is open.
+
+Taken: flat and rfc6962 are members (every corpus the text names carries
+them). RFC9162_SHA256 is a member under (a). A `check-set` with no
+`tree-shape` breaks the MUST of line 230 and is rejected (R02). A value
+outside the set is not an identifier of the set and is refused as free
+text (line 240, by the reason of line 110).
+
