@@ -29,6 +29,7 @@ CITES = {
     "row6": (278, "a non-verdict state carrying either qualifier"),
     "row7": (279, "a verdict state carrying a cause"),
     "row8": (280, "other-verdict foreclosed with discrimination demonstrated"),
+    "row9": (282, "discrimination demonstrated with other-verdict unknown or possible-not-demonstrated"),
 }
 
 # Numbered rows of section 4: citation names "row<n>".
@@ -151,6 +152,8 @@ def read_qualifiers(record, name, state, found):
                     name, state, field))
     if other[1] == "foreclosed" and disc[1] == "demonstrated":
         found.refuse("row8", "%s: other-verdict foreclosed beside discrimination demonstrated" % name)
+    if disc[1] == "demonstrated" and other[1] in ("unknown", "possible-not-demonstrated"):
+        found.refuse("row9", "%s: discrimination demonstrated, other-verdict %s" % (name, other[1]))
 
 
 def read_record(record, name, found):
