@@ -40,6 +40,7 @@ CITES = {
     "row10": (284, "foreclosed without a constraint set and a domain"),
     "row12": (288, "discrimination demonstrated citing an evidence object whose changed slot is the checker"),
     "row13": (294, "other-verdict demonstrated citing an evidence object whose moved does not contain the verdict"),
+    "row14": (296, "moved asserted on an evidence object that neither carries both observations nor references them with digests"),
     "row11": (286, "an asserted value without its evidence reference, on either field, foreclosed included"),
 }
 
@@ -293,6 +294,13 @@ def read_evidence(item, run, found):
     if not (isinstance(seen, list) and len(seen) == 2 and all(
             isinstance(o, dict) and ("carried" in o or "reference" in o) for o in seen)):
         found.leave_open("R19", "pair", "%s does not hold two observations" % where)
+    if "moved" in item and isinstance(seen, list):
+        carries = bool(seen) and all(isinstance(o, dict) and "carried" in o for o in seen)
+        references = bool(seen) and all(
+            isinstance(o, dict) and isinstance(o.get("reference"), dict) and o["reference"].get("sha256")
+            for o in seen)
+        if not carries and not references:
+            found.refuse("row14", "%s asserts moved but neither carries both observations nor references both with digests" % where)
     status, moved = recompute(item, run.store)
     compared = item.get("compared")
     declared = item.get("moved")
