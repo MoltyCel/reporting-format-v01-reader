@@ -22,6 +22,7 @@ CITES = {
     "row1": (271, "a non-verdict state with no cause"),
     "row2": (272, "void with not_applicable, out_of_scope or withheld"),
     "row3": (273, "not-exercised with integrity-failure"),
+    "row4": (274, "cause confinement-failed-during-check with any state but void"),
 }
 
 # Numbered rows of section 4: citation names "row<n>".
@@ -133,6 +134,8 @@ def read_record(record, name, found):
         found.refuse("row2", "%s is void with cause %s" % (name, code))
     if state == "not-exercised" and code == "integrity-failure":
         found.refuse("row3", "%s is not-exercised with integrity-failure" % name)
+    if code == "confinement-failed-during-check" and state != "void":
+        found.refuse("row4", "%s is %s with confinement-failed-during-check" % (name, state))
 
 
 def judge(member):
