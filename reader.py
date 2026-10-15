@@ -19,10 +19,12 @@ CITES = {
     "states": (54, "state pass | fail | not-exercised | inconclusive | void"),
     "freetext": (110, "Free text is refused in place of a disposition"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
+    "row1": (271, "a non-verdict state with no cause"),
 }
 
 # Numbered rows of section 4, keyed by citation name.
 ROW_NUMBER = {
+    "row1": 1,
 }
 
 
@@ -123,6 +125,10 @@ def read_record(record, name, found):
     elif written and code not in CAUSES:
         found.refuse("freetext", "%s gives cause %s, not a disposition" % (
             name, json.dumps(code)))
+    has_cause = written and (code in CAUSES or code in UNSETTLED_CAUSES)
+    resting = state in STATES and state not in VERDICT_STATES
+    if resting and not has_cause:
+        found.refuse("row1", "%s is %s with no cause from the vocabulary" % (name, state))
 
 
 def judge(member):
