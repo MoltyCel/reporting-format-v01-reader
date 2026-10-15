@@ -172,7 +172,9 @@ lists" (line 601).
 An observation in a member holds `verdict` and `rules`. Taken: the
 observation's `verdict` is what compared calls "verdict", its `rules` is
 what compared calls "fired-rule list" (the rule list). Recomputed moved is
-the set of those two names on which the two observations differ. Nothing
+the set of those two names on which the two observations differ; two rule
+lists differ when they are not equal as lists (a list keeps its order; the
+text does not say rule order is irrelevant, and no member needs it). Nothing
 else is in an observation, so the error list (7.1) can never be recomputed
 as moved.
 
