@@ -1,0 +1,16 @@
+Reader for the Agent Conformance Reporting Format v0.1
+Copyright 2026 Lars Kroehl
+
+reader.py, README.md, reports/ and out/ are licensed under the
+Apache License, Version 2.0 (LICENSE).
+
+spec/v01-text.txt and members/ are copied unchanged in content from
+probityai/agent-evidence-vectors, tag v0.18.1, licensed under the
+Apache License, Version 2.0, Copyright 2026 Sankalp Gilda:
+- spec/v01-text.txt is
+  vectors-w3c-report/spec-vendored/0087-arsentev-2026-09-30-v01.txt,
+  the v0.1 text as posted to public-agent-conformance@w3.org.
+- members/*.json are the 165 members of the section 10 selection from
+  vectors-w3c-report/vectors, reduced to the fields id, subject and
+  resolves. The other fields were removed so that the builder could not
+  see expected outcomes.

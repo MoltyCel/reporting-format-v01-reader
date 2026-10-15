@@ -52,3 +52,10 @@ the gap is in `reports/OPEN.md`. Every interpretation is in
 - `reports/STEPS.md` - steps, files opened, decisions
 - `reports/OPEN.md` - what would have needed a source outside the repo
 - `out/` - the recorded run
+
+## Licence
+
+Apache-2.0, see `LICENSE`. The text and the member files are copies from
+probityai/agent-evidence-vectors v0.18.1 under the same licence; `NOTICE`
+says which files and what was removed. This commit was added after the
+run; the run itself is the tag `frozen-run-1` (6d8ee54).
