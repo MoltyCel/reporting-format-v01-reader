@@ -16,6 +16,7 @@ SPEC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec", "v01-tex
 
 # Each citation: (first line in spec/v01-text.txt, words quoted from there on).
 CITES = {
+    "states": (54, "state pass | fail | not-exercised | inconclusive | void"),
 }
 
 # Numbered rows of section 4, keyed by citation name.
@@ -74,6 +75,28 @@ def describe(cite, reason, reading=None):
     return '%s: "%s" - %s' % (lead, flatten(words), tail)
 
 
+STATES = ("pass", "fail", "not-exercised", "inconclusive", "void")
+VERDICT_STATES = ("pass", "fail")
+
+
+def records_of(subject):
+    items = subject.get("checks")
+    if not isinstance(items, list):
+        return []
+    return [r for r in items if isinstance(r, dict)]
+
+
+def label(record, index):
+    return str(record.get("check", "#%d" % index))
+
+
+def read_record(record, name, found):
+    state = record.get("state")
+    if state not in STATES:
+        found.leave_open("R25", "states", "%s has state %s, outside the list" % (
+            name, json.dumps(state)))
+
+
 def judge(member):
     found = Verdict()
     subject = member.get("subject")
@@ -82,6 +105,8 @@ def judge(member):
         subject = {}
     if not isinstance(store, dict):
         store = {}
+    for index, record in enumerate(records_of(subject)):
+        read_record(record, label(record, index), found)
     return found
 
 
