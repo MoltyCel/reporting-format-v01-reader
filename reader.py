@@ -160,8 +160,9 @@ def read_qualifiers(record, name, state, found):
         missing = [k for k in ("constraint-set", "domain") if not other[2].get(k)]
         if missing:
             found.refuse("row10", "%s: foreclosed without %s" % (name, " and ".join(missing)))
-    for field, (written, value, body) in (("other-verdict", other), ("discrimination", disc)):
-        if value != "unknown" and not body.get("ref"):
+    for field, (written, value, body), allowed in (
+            ("other-verdict", other, OTHER_VALUES), ("discrimination", disc, DISCRIMINATION_VALUES)):
+        if value in allowed and value != "unknown" and not body.get("ref"):
             found.refuse("row11", "%s: %s %s names no evidence reference" % (name, field, value))
     return other, disc
 
