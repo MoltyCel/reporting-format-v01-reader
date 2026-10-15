@@ -64,10 +64,7 @@ def flatten(text):
 
 def verify_cites():
     """Fail loudly if a quotation does not start on the line it cites."""
-    lines = []
-    if os.path.isfile(SPEC):
-        with open(SPEC, encoding="utf-8") as handle:
-            lines = handle.read().split("\n")
+    lines = read_text(SPEC).split("\n") if os.path.isfile(SPEC) else []
     for name in sorted(CITES) if lines else []:
         start, words = CITES[name]
         here = flatten(" ".join(lines[start - 1:start + 7]))
@@ -517,10 +514,9 @@ def count_sides(run):
     sides = {"carried": 0, "referenced": 0}
     for item in run.evidence.values():
         for observation in item.get("observations") or []:
-            if not isinstance(observation, dict):
-                observation = {}
-            side = "carried" if "carried" in observation else (
-                "referenced" if "reference" in observation else None)
+            keys = observation if isinstance(observation, dict) else {}
+            side = "carried" if "carried" in keys else (
+                "referenced" if "reference" in keys else None)
             if side is not None:
                 sides[side] += 1
     return sides
@@ -548,13 +544,14 @@ def render(member_id, found):
 
 def load(directory):
     files = sorted(n for n in os.listdir(directory) if n.endswith(".json"))
-    parsed = [read_json(os.path.join(directory, n)) for n in files]
+    parsed = [json.loads(read_text(os.path.join(directory, n))) for n in files]
     return sorted(parsed, key=lambda m: str(m.get("id")))
 
 
-def read_json(path):
-    with open(path, encoding="utf-8") as handle:
-        return json.load(handle)
+def read_text(path):
+    """The file's bytes decoded as UTF-8 (spec text and member files alike)."""
+    with open(path, "rb") as source:
+        return source.read().decode("utf-8")
 
 
 def run(argv):

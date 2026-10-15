@@ -103,3 +103,23 @@ Result: `out/run.jsonl` is byte-identical to the one at 0ecc76b (sha256
 505dfb71a640e7ef0eceb7f2d859e5cf08dac4c81bed80672135e0eb51b92130), also
 with PYTHONHASHSEED 1 and 777; the source still parses under the 3.9
 grammar.
+
+## Step 7 - second line check
+
+Input: the coordinator's second list for `reader.py` at 966c10f: lines 67,
+520, 556. Only line numbers were given.
+
+Opened: `reader.py` (at 966c10f and the working copy), `out/run.jsonl`.
+
+Decided: both file reads (the spec in `verify_cites`, the members in
+`load`) now go through one helper `read_text`, which opens in binary and
+decodes UTF-8; members are parsed with `json.loads`. This removes the
+`lines = []` initialiser (now one conditional expression) and the
+text-mode `open(..., encoding=...)` line. In `count_sides` the observation
+is no longer replaced when it is not a dict; its keys are read through a
+guarded view instead. A check script confirms none of the three line
+texts remains. No line had to stay shared.
+
+Result: `out/run.jsonl` byte-identical, sha256
+505dfb71a640e7ef0eceb7f2d859e5cf08dac4c81bed80672135e0eb51b92130; the
+source parses under the 3.9 grammar.

@@ -27,5 +27,5 @@ something outside would have settled a reading. None of them was consulted.
 
 ## Lines that stay shared
 
-None. Every line listed after 0ecc76b was rewritten (see STEPS.md step 6).
-New lines may coincide again; that has not been checked yet.
+None. Every line listed after 0ecc76b (STEPS.md step 6) and after 966c10f
+(step 7) was rewritten. Lines written in step 7 have not been checked yet.
