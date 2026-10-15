@@ -23,6 +23,7 @@ CITES = {
     "slots": (152, "Five slots"),
     "fixedslot": (157, "fixed named, not implied: checker identity, constraint set, domain"),
     "pair": (141, "two observations from the same pinned checker"),
+    "contained": (164, "an object whose moved is not contained in its declared compared set is rejected"),
     "mismatch": (215, "resolves, digests differ integrity failure"),
     "degrade": (216, "does not resolve unchecked; the rows reading moved degrade"),
     "domain": (171, "The domain is a declared object, declared once at run level. foreclosed and the fixed slot reference it by identifier and no slot restates it"),
@@ -292,7 +293,22 @@ def read_evidence(item, run, found):
     if not (isinstance(seen, list) and len(seen) == 2 and all(
             isinstance(o, dict) and ("carried" in o or "reference" in o) for o in seen)):
         found.leave_open("R19", "pair", "%s does not hold two observations" % where)
-    status, _ = recompute(item, run.store)
+    status, moved = recompute(item, run.store)
+    compared = item.get("compared")
+    declared = item.get("moved")
+    if isinstance(compared, list):
+        declared_inside = not isinstance(declared, list) or all(x in compared for x in declared)
+        if status == "read":
+            recomputed_inside = all(x in compared for x in moved)
+            if not recomputed_inside and not declared_inside:
+                found.refuse("contained", "%s: moved %s escapes compared %s" % (
+                    where, json.dumps(sorted(moved)), json.dumps(compared)))
+            elif recomputed_inside != declared_inside:
+                found.leave_open("R13", "contained", "%s: recomputed moved %s and declared moved %s disagree on compared %s" % (
+                    where, json.dumps(sorted(moved)), json.dumps(declared), json.dumps(compared)))
+        elif status == "unresolved" and not declared_inside:
+            found.leave_open("R12", "degrade", "%s does not resolve and declares moved %s outside compared %s" % (
+                where, json.dumps(declared), json.dumps(compared)))
     if status == "mismatch":
         found.leave_open("R11", "mismatch", "%s: a referenced observation resolves with a different digest" % where)
     elif status == "unresolved":
