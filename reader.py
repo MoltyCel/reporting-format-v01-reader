@@ -27,6 +27,8 @@ CITES = {
     "mismatch": (215, "resolves, digests differ integrity failure"),
     "runlevel": (327, "a report asserting a completeness claim without the count of the population it quantifies over"),
     "claims": (353, "Each claim carries the size of the population it counts over:"),
+    "empty": (362, "A claim over an empty population is reported as not claimable, not as satisfied."),
+    "novoid": (364, "With a nonempty declared set it is satisfied when the void count is zero and not satisfied otherwise"),
     "aggregate": (343, "An aggregate is computed only over declared, exercised checks"),
     "fillings": (396, "the report says so and names what the producer has instead"),
     "failstate": (405, "\"Fail\" here is the state fail, in all three places. A non-pass is not enough"),
@@ -384,6 +386,14 @@ def read_claims(run, rollup, found):
         elif count != size:
             found.refuse("runlevel", "the %s claim counts %d, its population (%s) is %d" % (
                 name, count, CLAIM_POPULATIONS[name], size))
+        value = claim.get("claim")
+        if size == 0 and value != "not-claimable":
+            found.leave_open("R23", "empty", "the %s claim is %s over an empty population" % (name, json.dumps(value)))
+        if name == "no-void" and size > 0:
+            voids = sum(1 for r in run.records if r.get("state") == "void")
+            wanted = "satisfied" if voids == 0 else "not-satisfied"
+            if value != wanted:
+                found.leave_open("R23", "novoid", "the no-void claim is %s with %d void records" % (json.dumps(value), voids))
 
 
 def read_negative(run, found):
