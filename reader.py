@@ -35,6 +35,7 @@ CITES = {
     "row8": (280, "other-verdict foreclosed with discrimination demonstrated"),
     "row9": (282, "discrimination demonstrated with other-verdict unknown or possible-not-demonstrated"),
     "row10": (284, "foreclosed without a constraint set and a domain"),
+    "row12": (288, "discrimination demonstrated citing an evidence object whose changed slot is the checker"),
     "row11": (286, "an asserted value without its evidence reference, on either field, foreclosed included"),
 }
 
@@ -180,6 +181,10 @@ def read_qualifiers(record, name, state, run, found):
         if "ref" in body and cited(body, run) is None:
             found.leave_open("R25", cite, "%s: %s cites %s, no evidence object of the report" % (
                 name, field, json.dumps(body["ref"])))
+    target = cited(disc[2], run)
+    if disc[1] == "demonstrated" and target is not None and target.get("changed") == "checker rule":
+        found.refuse("row12", "%s: discrimination cites evidence %s, whose changed slot is the checker rule" % (
+            name, target.get("id")))
     return other, disc
 
 
