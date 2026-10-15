@@ -391,3 +391,22 @@ Neither: cannot-tell under R21. Where the run or the control declares no
 binding, nothing is compared (both readings agree). A control naming a
 check that is not a declared check is likewise cannot-tell under R21.
 
+
+## R22 - A prior run whose reference does not resolve
+
+Quoted: "A prior run is a reference, so the reading table in section 3
+applies: a prior run that reads as unchecked is not discriminating power"
+(line 443); "A prior run only counts where check identity survives across
+runs." (line 452); "A reference that does not resolve is legitimate"
+(line 387); "Where the prior run names a set of observations, 3.1 applies"
+(line 446).
+
+Taken: a prior-run reference the store cannot resolve reads as unchecked;
+the producer then has shown no discriminating power, which the reader
+weighs like "nothing" (line 422-424); this is not a refusal. Whether the
+reference declares check identity or a tree shape is not read once it is
+unchecked, since nothing it says can count.
+
+Alternative not taken: an unresolvable prior run, or one without a tree
+shape, is refused. No sentence with a refusal word says so.
+
