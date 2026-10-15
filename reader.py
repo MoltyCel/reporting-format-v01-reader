@@ -26,6 +26,7 @@ CITES = {
     "row3": (273, "not-exercised with integrity-failure"),
     "row4": (274, "cause confinement-failed-during-check with any state but void"),
     "row5": (276, "a declared exclusion with any state but not-exercised"),
+    "row6": (278, "a non-verdict state carrying either qualifier"),
     "row7": (279, "a verdict state carrying a cause"),
 }
 
@@ -140,6 +141,13 @@ def qualifier(record, field, allowed, cite, name, found):
 def read_qualifiers(record, name, state, found):
     other = qualifier(record, "other-verdict", OTHER_VALUES, "othervalues", name, found)
     disc = qualifier(record, "discrimination", DISCRIMINATION_VALUES, "discvalues", name, found)
+    if state in STATES and state not in VERDICT_STATES:
+        for field, (written, value, _) in (("other-verdict", other), ("discrimination", disc)):
+            if written and value != "unknown":
+                found.refuse("row6", "%s is %s and carries %s %s" % (name, state, field, value))
+            elif written:
+                found.leave_open("R05", "row6", "%s is %s and writes %s as unknown" % (
+                    name, state, field))
 
 
 def read_record(record, name, found):
