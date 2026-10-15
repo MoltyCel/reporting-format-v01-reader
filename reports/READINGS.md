@@ -351,3 +351,22 @@ three values, or a number of observations other than two: readings
 
 Neither. Such a member is cannot-tell under R19.
 
+
+## R20 - The 5.4 field: silence, shown-by-run, control-failed
+
+Quoted: "\"Nothing\" is a permitted answer. Silence in that field is not"
+(line 421); "\"Fail\" here is the state fail, in all three places. A
+non-pass is not enough:" (line 405); "shown-by-run requires a positive
+fail count, control-failed requires the control's state to be fail"
+(lines 415-417), reported by the text as "already the reading of the
+Python validator" and checked by the 0.12.0 validator (line 418).
+
+Taken: a roll-up with no `negative-capable` (or no `kind`) is refused by
+line 421. `shown-by-run` with no check record in state fail, and
+`control-failed` whose control state is not fail, are refused: the text
+states the requirement as the reading validators apply (R02 (b)). A `kind`
+outside the four is not settled (neither, cannot-tell under R20).
+
+Alternative not taken: these two are statements of how to read the field,
+for the reader to weigh (line 424), not refusals.
+
