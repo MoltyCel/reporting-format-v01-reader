@@ -20,6 +20,9 @@ CITES = {
     "othervalues": (57, "other-verdict unknown | possible-not-demonstrated |"),
     "discvalues": (60, "discrimination unknown | demonstrated(<evidence ref>)"),
     "freetext": (110, "Free text is refused in place of a disposition"),
+    "slots": (152, "Five slots"),
+    "fixedslot": (157, "fixed named, not implied: checker identity, constraint set, domain"),
+    "pair": (141, "two observations from the same pinned checker"),
     "domain": (171, "The domain is a declared object, declared once at run level. foreclosed and the fixed slot reference it by identifier and no slot restates it"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
     "row1": (271, "a non-verdict state with no cause"),
@@ -195,6 +198,34 @@ def domain_slot(value, where, run, found):
             where, value, json.dumps(run.domain)))
 
 
+CHANGED_VALUES = ("input artifact", "checker rule", "constraint")
+FIXED_NAMES = ("checker", "constraint-set", "domain")
+
+
+def read_evidence(item, run, found):
+    where = "evidence %s" % item.get("id")
+    absent = [k for k in ("changed", "fixed", "compared", "delta") if k not in item]
+    if absent:
+        found.leave_open("R19", "slots", "%s lacks %s" % (where, ", ".join(absent)))
+    if "changed" in item and item["changed"] not in CHANGED_VALUES:
+        found.leave_open("R19", "slots", "%s has changed %s" % (where, json.dumps(item["changed"])))
+    fixed = item.get("fixed")
+    if "fixed" in item:
+        if not isinstance(fixed, dict) or any(k not in fixed for k in FIXED_NAMES):
+            found.leave_open("R19", "fixedslot", "%s does not name checker, constraint set and domain" % where)
+        else:
+            domain_slot(fixed["domain"], "%s fixed slot" % where, run, found)
+    if "compared" in item and not isinstance(item["compared"], list):
+        found.leave_open("R19", "slots", "%s has no compared list" % where)
+    delta = item.get("delta")
+    if "delta" in item and not (isinstance(delta, dict) and isinstance(delta.get("changes"), list)):
+        found.leave_open("R19", "slots", "%s has no list of changes in its delta" % where)
+    seen = item.get("observations")
+    if not (isinstance(seen, list) and len(seen) == 2 and all(
+            isinstance(o, dict) and ("carried" in o or "reference" in o) for o in seen)):
+        found.leave_open("R19", "pair", "%s does not hold two observations" % where)
+
+
 def read_record(record, name, run, found):
     state = record.get("state")
     if state not in STATES:
@@ -236,6 +267,8 @@ def judge(member):
         found.leave_open("R17", "domain", "the report declares no run-level domain")
     for index, record in enumerate(run.records):
         read_record(record, label(record, index), run, found)
+    for key in sorted(run.evidence, key=str):
+        read_evidence(run.evidence[key], run, found)
     return found
 
 
