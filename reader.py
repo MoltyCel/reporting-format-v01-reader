@@ -23,6 +23,7 @@ CITES = {
     "slots": (152, "Five slots"),
     "fixedslot": (157, "fixed named, not implied: checker identity, constraint set, domain"),
     "pair": (141, "two observations from the same pinned checker"),
+    "mismatch": (215, "resolves, digests differ integrity failure"),
     "domain": (171, "The domain is a declared object, declared once at run level. foreclosed and the fixed slot reference it by identifier and no slot restates it"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
     "row1": (271, "a non-verdict state with no cause"),
@@ -204,6 +205,43 @@ class Run:
                 self.evidence[item.get("id")] = item
 
 
+def look(observation, store):
+    """Section 3 table for one observation: ("read", content), "unresolved" or "mismatch"."""
+    if "carried" in observation:
+        content = observation["carried"]
+        return ("read", content) if isinstance(content, dict) else ("unresolved", None)
+    ref = observation.get("reference")
+    if not isinstance(ref, dict):
+        return "unresolved", None
+    where = ref.get("vector")
+    held = store.get(where) if isinstance(where, str) else None
+    if not isinstance(held, dict) or not ref.get("sha256"):
+        return "unresolved", None
+    if held.get("sha256") != ref.get("sha256"):
+        return "mismatch", None
+    return "read", held
+
+
+def recompute(item, store):
+    """Return (status, moved) where moved is the recomputed set, or None."""
+    seen = item.get("observations")
+    if not (isinstance(seen, list) and len(seen) == 2 and all(isinstance(o, dict) for o in seen)):
+        return "malformed", None
+    looked = [look(o, store) for o in seen]
+    outcomes = [kind for kind, _ in looked]
+    if "mismatch" in outcomes:
+        return "mismatch", None
+    if "unresolved" in outcomes:
+        return "unresolved", None
+    first, second = looked[0][1], looked[1][1]
+    moved = set()
+    if first.get("verdict") != second.get("verdict"):
+        moved.add("verdict")
+    if first.get("rules") != second.get("rules"):
+        moved.add("fired-rule list")
+    return "read", moved
+
+
 def domain_slot(value, where, run, found):
     if not isinstance(value, str):
         found.leave_open("R17", "domain", "%s writes the domain as %s, not an identifier" % (
@@ -242,6 +280,11 @@ def read_evidence(item, run, found):
     if not (isinstance(seen, list) and len(seen) == 2 and all(
             isinstance(o, dict) and ("carried" in o or "reference" in o) for o in seen)):
         found.leave_open("R19", "pair", "%s does not hold two observations" % where)
+    status, _ = recompute(item, run.store)
+    if status == "mismatch":
+        found.leave_open("R11", "mismatch", "%s: a referenced observation resolves with a different digest" % where)
+    elif status == "unresolved":
+        found.note("%s: observations do not all resolve, read as unchecked" % where)
 
 
 def read_record(record, name, run, found):
