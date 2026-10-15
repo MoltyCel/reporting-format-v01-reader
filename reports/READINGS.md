@@ -370,3 +370,24 @@ outside the four is not settled (neither, cannot-tell under R20).
 Alternative not taken: these two are statements of how to read the field,
 for the reader to weigh (line 424), not refusals.
 
+
+## R21 - The control: same checker and configuration, same checks
+
+Quoted: "The control runs under the same checker revision and the same
+relevant configuration and constraints as the declared checks whose
+negative capability it is reported for." (line 431); "The control is the
+run's declared checks exercised against an input built to fail them, not a
+separate check beside them" (line 427); "Roel's 5.4 binding is proposed
+corpus row 29, where a control that ran under a different constraint set or
+checker than the run it speaks for is rejected and a run that declares no
+binding is not." (line 753).
+
+No numbered row and no refusal word in 5.4; the corpus row is "proposed".
+Readings for a control whose `fixed` differs from the run-level `fixed` on
+a name both declare: (a) refused, as corpus row 29; (b) not refused, a
+condition for the reader to weigh.
+
+Neither: cannot-tell under R21. Where the run or the control declares no
+binding, nothing is compared (both readings agree). A control naming a
+check that is not a declared check is likewise cannot-tell under R21.
+
