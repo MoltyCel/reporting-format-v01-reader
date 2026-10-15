@@ -24,6 +24,7 @@ CITES = {
     "fixedslot": (157, "fixed named, not implied: checker identity, constraint set, domain"),
     "pair": (141, "two observations from the same pinned checker"),
     "mismatch": (215, "resolves, digests differ integrity failure"),
+    "degrade": (216, "does not resolve unchecked; the rows reading moved degrade"),
     "domain": (171, "The domain is a declared object, declared once at run level. foreclosed and the fixed slot reference it by identifier and no slot restates it"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
     "row1": (271, "a non-verdict state with no cause"),
@@ -37,6 +38,7 @@ CITES = {
     "row9": (282, "discrimination demonstrated with other-verdict unknown or possible-not-demonstrated"),
     "row10": (284, "foreclosed without a constraint set and a domain"),
     "row12": (288, "discrimination demonstrated citing an evidence object whose changed slot is the checker"),
+    "row13": (294, "other-verdict demonstrated citing an evidence object whose moved does not contain the verdict"),
     "row11": (286, "an asserted value without its evidence reference, on either field, foreclosed included"),
 }
 
@@ -186,6 +188,16 @@ def read_qualifiers(record, name, state, run, found):
     if disc[1] == "demonstrated" and target is not None and target.get("changed") == "checker rule":
         found.refuse("row12", "%s: discrimination cites evidence %s, whose changed slot is the checker rule" % (
             name, target.get("id")))
+    target = cited(other[2], run)
+    if other[1] == "demonstrated" and target is not None:
+        status, moved = recompute(target, run.store)
+        declared = target.get("moved")
+        if status == "read" and "verdict" not in moved:
+            found.refuse("row13", "%s: evidence %s recomputes moved as %s, without the verdict" % (
+                name, target.get("id"), json.dumps(sorted(moved))))
+        elif status == "unresolved" and isinstance(declared, list) and "verdict" not in declared:
+            found.leave_open("R12", "degrade", "%s: evidence %s does not resolve and declares moved %s" % (
+                name, target.get("id"), json.dumps(declared)))
     return other, disc
 
 
