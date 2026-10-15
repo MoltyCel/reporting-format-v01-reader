@@ -20,6 +20,7 @@ CITES = {
     "othervalues": (57, "other-verdict unknown | possible-not-demonstrated |"),
     "discvalues": (60, "discrimination unknown | demonstrated(<evidence ref>)"),
     "freetext": (110, "Free text is refused in place of a disposition"),
+    "domain": (171, "The domain is a declared object, declared once at run level. foreclosed and the fixed slot reference it by identifier and no slot restates it"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
     "row1": (271, "a non-verdict state with no cause"),
     "row2": (272, "void with not_applicable, out_of_scope or withheld"),
@@ -142,7 +143,7 @@ def qualifier(record, field, allowed, cite, name, found):
     return True, value, body
 
 
-def read_qualifiers(record, name, state, found):
+def read_qualifiers(record, name, state, run, found):
     other = qualifier(record, "other-verdict", OTHER_VALUES, "othervalues", name, found)
     disc = qualifier(record, "discrimination", DISCRIMINATION_VALUES, "discvalues", name, found)
     if state in STATES and state not in VERDICT_STATES:
@@ -160,6 +161,8 @@ def read_qualifiers(record, name, state, found):
         missing = [k for k in ("constraint-set", "domain") if not other[2].get(k)]
         if missing:
             found.refuse("row10", "%s: foreclosed without %s" % (name, " and ".join(missing)))
+        if "domain" in other[2]:
+            domain_slot(other[2]["domain"], "%s other-verdict" % name, run, found)
     for field, (written, value, body), allowed in (
             ("other-verdict", other, OTHER_VALUES), ("discrimination", disc, DISCRIMINATION_VALUES)):
         if value in allowed and value != "unknown" and not body.get("ref"):
@@ -167,7 +170,32 @@ def read_qualifiers(record, name, state, found):
     return other, disc
 
 
-def read_record(record, name, found):
+class Run:
+    """What the rules need from the whole report."""
+
+    def __init__(self, subject, store):
+        self.subject = subject
+        self.store = store
+        self.records = records_of(subject)
+        domain = subject.get("domain")
+        self.domain = domain.get("id") if isinstance(domain, dict) else None
+        self.evidence = {}
+        items = subject.get("evidence")
+        for item in items if isinstance(items, list) else []:
+            if isinstance(item, dict) and item.get("id") not in self.evidence:
+                self.evidence[item.get("id")] = item
+
+
+def domain_slot(value, where, run, found):
+    if not isinstance(value, str):
+        found.leave_open("R17", "domain", "%s writes the domain as %s, not an identifier" % (
+            where, json.dumps(value, sort_keys=True)))
+    elif value != run.domain:
+        found.leave_open("R17", "domain", "%s names domain %s, the run's is %s" % (
+            where, value, json.dumps(run.domain)))
+
+
+def read_record(record, name, run, found):
     state = record.get("state")
     if state not in STATES:
         found.leave_open("R25", "states", "%s has state %s, outside the list" % (
@@ -192,7 +220,7 @@ def read_record(record, name, found):
         found.refuse("row5", "%s is a declared exclusion in state %s" % (name, state))
     if state in VERDICT_STATES and written:
         found.refuse("row7", "%s is %s and carries a cause" % (name, state))
-    read_qualifiers(record, name, state, found)
+    read_qualifiers(record, name, state, run, found)
 
 
 def judge(member):
@@ -203,8 +231,11 @@ def judge(member):
         subject = {}
     if not isinstance(store, dict):
         store = {}
-    for index, record in enumerate(records_of(subject)):
-        read_record(record, label(record, index), found)
+    run = Run(subject, store)
+    if run.domain is None:
+        found.leave_open("R17", "domain", "the report declares no run-level domain")
+    for index, record in enumerate(run.records):
+        read_record(record, label(record, index), run, found)
     return found
 
 
