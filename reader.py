@@ -25,6 +25,7 @@ CITES = {
     "pair": (141, "two observations from the same pinned checker"),
     "contained": (164, "an object whose moved is not contained in its declared compared set is rejected"),
     "mismatch": (215, "resolves, digests differ integrity failure"),
+    "leafcount": (229, "A digest match establishes a set only when the count of leaves is bound into what is signed or hashed"),
     "mustshape": (230, "a report MUST declare which tree shape it uses"),
     "closedset": (240, "The declaration is an identifier from a closed, versioned set of tree construction and hash identifiers, not free text"),
     "degrade": (216, "does not resolve unchecked; the rows reading moved degrade"),
@@ -337,6 +338,12 @@ def read_collection(run, found):
         found.refuse("mustshape", "the check-set digest declares no tree shape")
     elif shape not in TREE_SHAPES:
         found.refuse("closedset", "the check-set declares tree shape %s, not an identifier of the set" % json.dumps(shape))
+    count = collection.get("leaf-count")
+    if "leaf-count" not in collection:
+        found.leave_open("R16", "leafcount", "the check-set states no leaf count")
+    elif count != len(run.records) or isinstance(count, bool):
+        found.leave_open("R16", "leafcount", "the check-set states %s leaves over %d check records" % (
+            json.dumps(count), len(run.records)))
 
 
 def read_record(record, name, run, found):
