@@ -38,3 +38,32 @@ Taken: (a). Mapping used:
 | `resolves` | the reader's store (section 3: "resolvability is a property of the reader") |
 | `format`, `domain.description`, `cause.detail`, `check-set.domain-separation` | not read; no row reads them |
 
+
+## R02 - What makes reject, accept and cannot-tell
+
+Quoted: "\"Rejected\" means a conforming validator refuses the object and
+names the row that refused it." (line 44); "An implementation conforms to
+v0.1 when it rejects every reject member ... under the row that member
+names, and accepts every accept member." (line 693).
+
+The text defines rejected by a row. It also refuses things in sentences
+outside the table: "Free text is refused in place of a disposition"
+(line 110), "an object whose moved is not contained in its declared
+compared set is rejected" (line 164), "a report MUST declare which tree
+shape it uses" (line 230), "Silence in that field is not" [permitted]
+(line 421), and the unnumbered "Run-level rejection" (line 327). Many other
+sentences state how a report should be, without saying a validator refuses
+an object that is otherwise.
+
+Readings: (a) reject only on a numbered row; (b) reject on a numbered row,
+the run-level rejection, or a sentence that itself says refused, rejected,
+MUST or not permitted; a stated requirement with no such word, when broken,
+is not settled either way; (c) reject on any broken requirement.
+
+Taken: (b). Consequences: a member is rejected when any ground of (b)
+fires; otherwise it is cannot-tell when its outcome depends on a reading
+marked "neither" below, or on a requirement the text states without a
+refusal; otherwise it is accepted. "Accepted" has no definition of its own
+in the text beyond line 693, so accepted means: not rejected and nothing
+left open.
+
