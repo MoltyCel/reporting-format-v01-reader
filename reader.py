@@ -25,6 +25,8 @@ CITES = {
     "pair": (141, "two observations from the same pinned checker"),
     "contained": (164, "an object whose moved is not contained in its declared compared set is rejected"),
     "mismatch": (215, "resolves, digests differ integrity failure"),
+    "runlevel": (327, "a report asserting a completeness claim without the count of the population it quantifies over"),
+    "claims": (353, "Each claim carries the size of the population it counts over:"),
     "aggregate": (343, "An aggregate is computed only over declared, exercised checks"),
     "fillings": (396, "the report says so and names what the producer has instead"),
     "failstate": (405, "\"Fail\" here is the state fail, in all three places. A non-pass is not enough"),
@@ -353,11 +355,43 @@ def read_collection(run, found):
             json.dumps(count), len(run.records)))
 
 
+# 5.2: which population each claim counts over.
+CLAIM_POPULATIONS = {
+    "accounting": "declared checks",
+    "execution": "declared checks",
+    "evidence": "verdict records",
+    "no-void": "declared checks",
+}
+
+
+def read_claims(run, rollup, found):
+    claims = rollup.get("completeness")
+    if not isinstance(claims, dict):
+        return
+    sizes = {
+        "declared checks": len(run.records),
+        "verdict records": sum(1 for r in run.records if r.get("state") in VERDICT_STATES),
+    }
+    for name in sorted(claims):
+        claim = claims[name] if isinstance(claims[name], dict) else {}
+        if name not in CLAIM_POPULATIONS:
+            found.leave_open("R23", "claims", "the roll-up makes a claim %s the text does not name" % json.dumps(name))
+            continue
+        size = sizes[CLAIM_POPULATIONS[name]]
+        count = claim.get("population")
+        if not isinstance(count, int) or isinstance(count, bool):
+            found.refuse("runlevel", "the %s claim carries no population count" % name)
+        elif count != size:
+            found.refuse("runlevel", "the %s claim counts %d, its population (%s) is %d" % (
+                name, count, CLAIM_POPULATIONS[name], size))
+
+
 def read_negative(run, found):
     rollup = run.subject.get("roll-up")
     if not isinstance(rollup, dict):
         found.leave_open("R24", "aggregate", "the report has no roll-up")
         return
+    read_claims(run, rollup, found)
     field = rollup.get("negative-capable")
     kind = field.get("kind") if isinstance(field, dict) else None
     if kind is None:
