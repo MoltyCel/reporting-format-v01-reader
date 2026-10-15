@@ -120,3 +120,20 @@ Taken: (b) where a non-verdict record carries a non-default value (row 6
 fires under both readings). Neither where it writes the qualifier with the
 value unknown: such a member is cannot-tell under R05.
 
+
+## R06 - Row 11: which values need an evidence reference
+
+Quoted: "11 an asserted value without its evidence reference, on either
+field, foreclosed included" (line 286); "no value is assertable without the
+artifact that carries it" (line 137); the grammar
+"other-verdict unknown | possible-not-demonstrated | demonstrated(<ref>) |
+foreclosed(<constraint set>, <domain>)" (lines 57-59).
+
+Readings: (a) every value other than the default unknown is asserted and
+needs a reference, possible-not-demonstrated included; (b) only values
+whose grammar carries a reference, plus foreclosed by the row's own words.
+
+Taken: (a). Line 137 says "no value", with unknown named as the default;
+the grammar does not decide it, since foreclosed carries no <ref> in the
+grammar and still needs one by row 11.
+
