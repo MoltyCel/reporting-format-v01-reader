@@ -24,6 +24,7 @@ CITES = {
     "row3": (273, "not-exercised with integrity-failure"),
     "row4": (274, "cause confinement-failed-during-check with any state but void"),
     "row5": (276, "a declared exclusion with any state but not-exercised"),
+    "row7": (279, "a verdict state carrying a cause"),
 }
 
 # Numbered rows of section 4: citation names "row<n>".
@@ -139,6 +140,8 @@ def read_record(record, name, found):
         found.refuse("row4", "%s is %s with confinement-failed-during-check" % (name, state))
     if record.get("declared-exclusion") is True and state != "not-exercised":
         found.refuse("row5", "%s is a declared exclusion in state %s" % (name, state))
+    if state in VERDICT_STATES and written:
+        found.refuse("row7", "%s is %s and carries a cause" % (name, state))
 
 
 def judge(member):
