@@ -381,6 +381,14 @@ def read_negative(run, found):
                 if ours[key] != theirs[key]:
                     found.leave_open("R21", "binding", "the control ran under %s %s, the run under %s" % (
                         key, json.dumps(theirs[key]), json.dumps(ours[key])))
+    elif kind == "prior-discriminating-run":
+        outcome, _ = look({"reference": field.get("reference")}, run.store)
+        if outcome == "mismatch":
+            found.leave_open("R11", "mismatch", "the prior run's reference resolves with a different digest")
+        elif outcome == "unresolved":
+            found.note("prior run does not resolve: unchecked, not discriminating power, not a refusal (R22)")
+        else:
+            found.note("prior run resolves with a matching digest; its content is not read (R22)")
     elif kind not in ("nothing", "shown-by-run", "control-failed", "prior-discriminating-run"):
         found.leave_open("R20", "fillings", "the roll-up names %s, not one of the fillings" % json.dumps(kind))
 
