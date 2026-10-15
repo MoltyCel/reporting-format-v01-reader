@@ -80,3 +80,26 @@ malformed record.
 
 Taken: (a). The text names the default; a default needs no writing.
 
+
+## R04 - The cause vocabulary is closed; free text is not a cause
+
+Quoted: "Its vocabulary is the eight closed dispositions of CAP-1" (line 76),
+the eight names (lines 78-79), the added values evidence-does-not-hold
+(line 85), integrity-failure (line 89), precondition-unsatisfiable
+(line 93), confinement-failed-during-check (line 99); "Free text is refused
+in place of a disposition, for CAP-1's reason:" (line 110).
+
+Readings for a `cause.code` outside the vocabulary: (a) it is free text in
+place of a disposition, refused by line 110, and on a non-verdict state the
+record then has no cause, so row 1 fires as well; (b) it is an unknown
+value with no row.
+
+Taken: (a). A `cause.detail` string beside a valid code is not "in place
+of" a disposition and is not read.
+
+Sub-reading: line 89 says "integrity-failure kept separate from
+availability-failure". Whether availability-failure is a value of its own
+or a name for unavailable is not said. Neither: a member using
+`availability-failure` would be cannot-tell under R04. (No reading is
+needed for integrity-failure: row 3 uses it as a value.)
+
