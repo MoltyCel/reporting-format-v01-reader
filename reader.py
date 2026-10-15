@@ -220,6 +220,9 @@ def read_evidence(item, run, found):
     delta = item.get("delta")
     if "delta" in item and not (isinstance(delta, dict) and isinstance(delta.get("changes"), list)):
         found.leave_open("R19", "slots", "%s has no list of changes in its delta" % where)
+    elif "delta" in item and "arity" in delta:
+        found.note("%s: declared arity %s not read, recomputed %d from the delta (R18)" % (
+            where, json.dumps(delta["arity"]), len(delta["changes"])))
     seen = item.get("observations")
     if not (isinstance(seen, list) and len(seen) == 2 and all(
             isinstance(o, dict) and ("carried" in o or "reference" in o) for o in seen)):
