@@ -160,3 +160,19 @@ in 0036)" (lines 155-156).
 Taken (only reading found): `changed` = `checker rule` is "the checker".
 `input artifact` and `constraint` are not.
 
+
+## R09 - Recomputing moved from the observations
+
+Quoted: "moved is recomputed, not declared. It is recomputed over what the
+referenced observations actually contain" (line 163); "The vocabulary for
+compared enumerates verdict, and verdict with rule list; there is no value
+for the list itself." (line 583); "MUST-FAIL pairs with different fired-rule
+lists" (line 601).
+
+An observation in a member holds `verdict` and `rules`. Taken: the
+observation's `verdict` is what compared calls "verdict", its `rules` is
+what compared calls "fired-rule list" (the rule list). Recomputed moved is
+the set of those two names on which the two observations differ. Nothing
+else is in an observation, so the error list (7.1) can never be recomputed
+as moved.
+
