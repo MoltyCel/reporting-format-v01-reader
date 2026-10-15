@@ -28,6 +28,7 @@ CITES = {
     "aggregate": (343, "An aggregate is computed only over declared, exercised checks"),
     "fillings": (396, "the report says so and names what the producer has instead"),
     "failstate": (405, "\"Fail\" here is the state fail, in all three places. A non-pass is not enough"),
+    "controlstate": (416, "control-failed requires the control's state to be fail"),
     "silence": (421, "\"Nothing\" is a permitted answer. Silence in that field is not"),
     "leafcount": (229, "A digest match establishes a set only when the count of leaves is bound into what is signed or hashed"),
     "mustshape": (230, "a report MUST declare which tree shape it uses"),
@@ -362,6 +363,12 @@ def read_negative(run, found):
     elif kind == "shown-by-run":
         if not any(r.get("state") == "fail" for r in run.records):
             found.refuse("failstate", "the roll-up claims shown-by-run but no check record is in state fail")
+    elif kind == "control-failed":
+        control = field.get("control")
+        if not isinstance(control, dict):
+            control = {}
+        if control.get("state") != "fail":
+            found.refuse("controlstate", "the control's state is %s, not fail" % json.dumps(control.get("state")))
     elif kind not in ("nothing", "shown-by-run", "control-failed", "prior-discriminating-run"):
         found.leave_open("R20", "fillings", "the roll-up names %s, not one of the fillings" % json.dumps(kind))
 
