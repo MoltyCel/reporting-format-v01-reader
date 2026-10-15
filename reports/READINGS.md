@@ -307,3 +307,19 @@ Neither. A member whose `check-set` lacks `leaf-count`, or whose
 `leaf-count` differs from its number of check records, is cannot-tell
 under R16.
 
+
+## R17 - A slot that restates the domain, or names another one
+
+Quoted: "The domain is a declared object, declared once at run level.
+foreclosed and the fixed slot reference it by identifier and no slot
+restates it (Nicolás; Kenne, 0040). This removed a rejection row instead of
+adding one: foreclosure over a domain that is not the run's domain can no
+longer be written." (lines 171-175).
+
+Readings for a `fixed.domain` or foreclosed `domain` that is an object
+instead of an identifier, or an identifier other than the run domain's:
+(a) refused, as not written in the format; (b) not refused, since the text
+says a row was removed, not added.
+
+Neither. Such a member is cannot-tell under R17.
+
