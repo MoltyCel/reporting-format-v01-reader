@@ -176,3 +176,17 @@ the set of those two names on which the two observations differ. Nothing
 else is in an observation, so the error list (7.1) can never be recomputed
 as moved.
 
+
+## R10 - Resolving a reference and comparing its digest
+
+Quoted: "resolves, digests match / resolves, digests differ / does not
+resolve" (lines 213-216); "the digest only tells them whether what they did
+resolve is what the object was written against" (line 223).
+
+The text does not say how a locator is formed or over which bytes a digest
+is taken. Taken: the locator is the reference's `vector`; it resolves when
+the store has that key; the digests match when the reference's `sha256`
+equals the `sha256` the store holds for it. The reader does not re-hash
+store contents: the text names no serialization to hash. A reference with
+no `vector` does not resolve.
+
