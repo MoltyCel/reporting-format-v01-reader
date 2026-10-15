@@ -87,6 +87,7 @@ class Verdict:
         self.refusals = []   # (sort key, citation name, reason)
         self.unsettled = []  # (reading id, citation name, reason)
         self.notes = []
+        self.recount = {}
 
     def refuse(self, cite, reason):
         if cite in ROW_NUMBER:
@@ -492,6 +493,14 @@ def judge(member):
         read_record(record, label(record, index), run, found)
     for key in sorted(run.evidence, key=str):
         read_evidence(run.evidence[key], run, found)
+    carried = referenced = 0
+    for item in run.evidence.values():
+        for observation in item.get("observations") or []:
+            if isinstance(observation, dict) and "carried" in observation:
+                carried += 1
+            elif isinstance(observation, dict) and "reference" in observation:
+                referenced += 1
+    found.recount = {"carried": carried, "referenced": referenced}
     read_collection(run, found)
     read_negative(run, found)
     return found
@@ -505,6 +514,7 @@ def render(member_id, found):
         "grounds": [describe(c, r) for _, c, r in refusals],
         "open": sorted(set(r for r, _, _ in unsettled)),
         "notes": sorted(set(found.notes)),
+        "recount": found.recount,
     }
     if refusals:
         _, cite, reason = refusals[0]
