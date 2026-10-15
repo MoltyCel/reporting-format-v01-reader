@@ -149,3 +149,14 @@ record whose cause is out_of_scope.
 Taken: (a). out_of_scope is a cause, and causes are read by rows 1 to 4;
 nothing says a cause value is an exclusion.
 
+
+## R08 - Row 12: "the checker" as the changed object
+
+Quoted: "12 discrimination demonstrated citing an evidence object whose
+changed slot is the checker" (line 288); "changed which object varied:
+input artifact | checker rule | constraint (0072 part 1.3; input | checker
+in 0036)" (lines 155-156).
+
+Taken (only reading found): `changed` = `checker rule` is "the checker".
+`input artifact` and `constraint` are not.
+
