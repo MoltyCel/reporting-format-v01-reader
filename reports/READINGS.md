@@ -459,3 +459,14 @@ A state, other-verdict value or discrimination value outside its list, or a
 qualifier `ref` naming no evidence object of the report, has no row.
 Neither: cannot-tell under R25. (Causes are R04.)
 
+
+## R26 - Order: a firing row decides even when other points are open
+
+Quoted: "\"Rejected\" means a conforming validator refuses the object and
+names the row that refused it." (line 44); "A rejection vector names the
+row that rejected it" (line 331).
+
+Taken: when any ground of R02 (b) fires, the member is rejected and the
+first ground in text order is named, even if other points of the same
+member are open; all grounds found are also listed. A refusal does not
+wait on the outcome of an unrelated open reading.
