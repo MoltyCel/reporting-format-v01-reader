@@ -323,3 +323,16 @@ says a row was removed, not added.
 
 Neither. Such a member is cannot-tell under R17.
 
+
+## R18 - A declared arity, and a delta of more than one change
+
+Quoted: "Arity is not a slot. A declared arity is forgeable the same way a
+declared moved is, so arity is recomputed from the delta (0072)."
+(line 177); "7.2 Input side: what counts as one field (was row B)"
+(line 590); rows 1-14 (lines 271-297).
+
+Taken: a declared `delta.arity` is not read; arity is the number of
+`delta.changes`. No row of section 4 reads arity (row B is not in v0.1,
+it is the open item of 7.2), so neither a declared arity nor an arity above
+one refuses an object.
+
