@@ -410,3 +410,23 @@ unchecked, since nothing it says can count.
 Alternative not taken: an unresolvable prior run, or one without a tree
 shape, is refused. No sentence with a refusal word says so.
 
+
+## R23 - Completeness claims: count and value
+
+Quoted: "Run-level rejection (Evgenii, 0036, agreed by Nicolás, 0039): a
+report asserting a completeness claim without the count of the population
+it quantifies over." (lines 327-329); populations (lines 355-358); "A claim
+over an empty population is reported as not claimable, not as satisfied."
+(line 362); "With a nonempty declared set it is satisfied when the void
+count is zero and not satisfied otherwise" (line 364).
+
+Population count: readings (a) a figure that differs from the recounted
+population is not "the count of the population" and the run-level row
+fires; (b) only a missing figure fires. Taken: (a). Populations recounted:
+accounting, execution, no-void = number of check records; evidence =
+number of records in state pass or fail.
+
+Claim value: a claim reported satisfied over an empty population, or a
+no-void claim whose value contradicts the void count. No refusal word;
+neither: cannot-tell under R23.
+
