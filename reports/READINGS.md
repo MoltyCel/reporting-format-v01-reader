@@ -207,3 +207,21 @@ outcome for the middle state; 5.3 calls non-resolution legitimate
 Neither. A member with a mismatching reference on an evidence object is
 cannot-tell under R11 (unless another ground rejects it).
 
+
+## R12 - "The rows reading moved degrade"
+
+Quoted: "does not resolve unchecked; the rows reading moved degrade"
+(line 216); "row 13 reads moved, which is recomputed and degrades when
+references do not resolve" (line 316); "The counter is disclosure and not
+rejection. A reference that does not resolve is legitimate" (line 386).
+
+Readings when an evidence object's observations do not all resolve:
+(a) the rows reading moved (row 13, the containment sentence of line 164)
+are not evaluated for it; (b) they fall back to the declared moved and
+read it as a consistency check.
+
+Not rejection either way for the non-resolution itself (line 386, settled).
+Neither between (a) and (b): where (b) would fire and (a) would not, the
+member is cannot-tell under R12. Where (b) would not fire, both agree and
+the member is not refused on that ground.
+
