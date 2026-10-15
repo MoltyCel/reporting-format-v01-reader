@@ -396,12 +396,24 @@ def read_claims(run, rollup, found):
                 found.leave_open("R23", "novoid", "the no-void claim is %s with %d void records" % (json.dumps(value), voids))
 
 
+def read_counts(run, rollup, found):
+    states = [r.get("state") for r in run.records]
+    recount = dict((s, states.count(s)) for s in STATES)
+    recount["declared"] = len(states)
+    recount["exercised"] = sum(recount[s] for s in ("pass", "fail", "inconclusive", "void"))
+    for key in sorted(recount):
+        if key in rollup and rollup[key] != recount[key]:
+            found.leave_open("R24", "aggregate", "the roll-up gives %s %s, the records give %d" % (
+                key, json.dumps(rollup[key]), recount[key]))
+
+
 def read_negative(run, found):
     rollup = run.subject.get("roll-up")
     if not isinstance(rollup, dict):
         found.leave_open("R24", "aggregate", "the report has no roll-up")
         return
     read_claims(run, rollup, found)
+    read_counts(run, rollup, found)
     field = rollup.get("negative-capable")
     kind = field.get("kind") if isinstance(field, dict) else None
     if kind is None:
