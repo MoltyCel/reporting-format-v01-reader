@@ -25,6 +25,8 @@ CITES = {
     "pair": (141, "two observations from the same pinned checker"),
     "contained": (164, "an object whose moved is not contained in its declared compared set is rejected"),
     "mismatch": (215, "resolves, digests differ integrity failure"),
+    "mustshape": (230, "a report MUST declare which tree shape it uses"),
+    "closedset": (240, "The declaration is an identifier from a closed, versioned set of tree construction and hash identifiers, not free text"),
     "degrade": (216, "does not resolve unchecked; the rows reading moved degrade"),
     "domain": (171, "The domain is a declared object, declared once at run level. foreclosed and the fixed slot reference it by identifier and no slot restates it"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
@@ -323,6 +325,20 @@ def read_evidence(item, run, found):
         found.note("%s: observations do not all resolve, read as unchecked" % where)
 
 
+TREE_SHAPES = ("flat", "rfc6962", "RFC9162_SHA256")
+
+
+def read_collection(run, found):
+    collection = run.subject.get("check-set")
+    if not isinstance(collection, dict):
+        return
+    shape = collection.get("tree-shape")
+    if "tree-shape" not in collection:
+        found.refuse("mustshape", "the check-set digest declares no tree shape")
+    elif shape not in TREE_SHAPES:
+        found.refuse("closedset", "the check-set declares tree shape %s, not an identifier of the set" % json.dumps(shape))
+
+
 def read_record(record, name, run, found):
     state = record.get("state")
     if state not in STATES:
@@ -366,6 +382,7 @@ def judge(member):
         read_record(record, label(record, index), run, found)
     for key in sorted(run.evidence, key=str):
         read_evidence(run.evidence[key], run, found)
+    read_collection(run, found)
     return found
 
 
