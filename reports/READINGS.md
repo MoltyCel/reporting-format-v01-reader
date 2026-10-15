@@ -190,3 +190,20 @@ equals the `sha256` the store holds for it. The reader does not re-hash
 store contents: the text names no serialization to hash. A reference with
 no `vector` does not resolve.
 
+
+## R11 - What a digest mismatch does to the verdict
+
+Quoted: "Reading a well-formed object is a table, not a row, because
+resolvability is a property of the reader and not of the object:" (line 210);
+"resolves, digests differ integrity failure" (line 215); "a mismatch needs
+someone to find out which side moved" (line 221).
+
+Readings: (a) integrity failure refuses the object; (b) it is not a row, so
+the object is not rejected, and the rows reading moved simply do not read
+that observation. The text calls the table "not a row" and gives no
+outcome for the middle state; 5.3 calls non-resolution legitimate
+(line 387) but says nothing of a mismatch.
+
+Neither. A member with a mismatching reference on an evidence object is
+cannot-tell under R11 (unless another ground rejects it).
+
