@@ -25,6 +25,9 @@ CITES = {
     "pair": (141, "two observations from the same pinned checker"),
     "contained": (164, "an object whose moved is not contained in its declared compared set is rejected"),
     "mismatch": (215, "resolves, digests differ integrity failure"),
+    "aggregate": (343, "An aggregate is computed only over declared, exercised checks"),
+    "fillings": (396, "the report says so and names what the producer has instead"),
+    "silence": (421, "\"Nothing\" is a permitted answer. Silence in that field is not"),
     "leafcount": (229, "A digest match establishes a set only when the count of leaves is bound into what is signed or hashed"),
     "mustshape": (230, "a report MUST declare which tree shape it uses"),
     "closedset": (240, "The declaration is an identifier from a closed, versioned set of tree construction and hash identifiers, not free text"),
@@ -346,6 +349,19 @@ def read_collection(run, found):
             json.dumps(count), len(run.records)))
 
 
+def read_negative(run, found):
+    rollup = run.subject.get("roll-up")
+    if not isinstance(rollup, dict):
+        found.leave_open("R24", "aggregate", "the report has no roll-up")
+        return
+    field = rollup.get("negative-capable")
+    kind = field.get("kind") if isinstance(field, dict) else None
+    if kind is None:
+        found.refuse("silence", "the roll-up does not say whether its checks could produce a negative verdict")
+    elif kind not in ("nothing", "shown-by-run", "control-failed", "prior-discriminating-run"):
+        found.leave_open("R20", "fillings", "the roll-up names %s, not one of the fillings" % json.dumps(kind))
+
+
 def read_record(record, name, run, found):
     state = record.get("state")
     if state not in STATES:
@@ -390,6 +406,7 @@ def judge(member):
     for key in sorted(run.evidence, key=str):
         read_evidence(run.evidence[key], run, found)
     read_collection(run, found)
+    read_negative(run, found)
     return found
 
 
