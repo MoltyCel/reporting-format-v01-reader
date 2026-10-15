@@ -246,3 +246,19 @@ Taken where both agree: reject when the recomputed and the declared moved
 both escape compared; no ground when both are contained. Neither where they
 disagree: such a member is cannot-tell under R13.
 
+
+## R14 - Row 14 with mixed carry and reference
+
+Quoted: "14 moved asserted on an evidence object that neither carries both
+observations nor references them with digests" (line 296); "The format
+permits both and requires one (Nicolás)." (line 204).
+
+Readings: (a) literal: the object must carry both or reference both with
+digests; one carried and one referenced fires the row; (b) per
+observation: each must be carried or referenced with a digest.
+
+Taken: (a). Row 14 is a form row "decidable from the object alone"
+(line 207) and its wording is a plain neither/nor over the object; lines
+205-207 also speak of the object staying with its corpus or leaving it,
+not of single observations.
+
