@@ -285,3 +285,25 @@ them). RFC9162_SHA256 is a member under (a). A `check-set` with no
 outside the set is not an identifier of the set and is refused as free
 text (line 240, by the reason of line 110).
 
+
+## R16 - The leaf count, and why roots are not recomputed
+
+Quoted: "A digest match establishes a set only when the count of leaves is
+bound into what is signed or hashed" (line 229); "Binding the count is
+necessary and is not a general membership proof." (line 231); "The list
+has not said what flat denotes in the text's own terms; until it does, a
+member is defined by its vector pair." (line 774).
+
+The text gives no leaf encoding for any shape, and says flat is not defined
+in its own terms. The reader therefore never recomputes a `check-set` root.
+(RFC 6962 is cited at line 234, but what a leaf is in a report is not.)
+
+For the count: readings (a) a `check-set` with no `leaf-count`, or one that
+differs from the number of check records, is refused; (b) such a digest
+just establishes no set, which the reader weighs; nothing refuses it.
+No sentence with a refusal word covers the count (R02).
+
+Neither. A member whose `check-set` lacks `leaf-count`, or whose
+`leaf-count` differs from its number of check records, is cannot-tell
+under R16.
+
