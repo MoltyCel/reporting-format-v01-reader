@@ -103,3 +103,20 @@ or a name for unavailable is not said. Neither: a member using
 `availability-failure` would be cannot-tell under R04. (No reading is
 needed for integrity-failure: row 3 uses it as a value.)
 
+
+## R05 - Row 6: what "carrying" a qualifier means
+
+Quoted: "6 a non-verdict state carrying either qualifier narrowed 0038"
+(line 278); "Four fields per check" (line 52); "cause required on the three
+non-verdict states, absent on the two verdict states" (line 55).
+
+Readings: (a) carrying means the qualifier is written at all, so a
+non-verdict record with `other-verdict: {value: unknown}` fires row 6;
+(b) carrying means asserting a value other than the default unknown, since
+every record has four fields (line 52) and the text states absence only for
+cause (line 55). "narrowed 0038" says the row was narrowed but not to what.
+
+Taken: (b) where a non-verdict record carries a non-default value (row 6
+fires under both readings). Neither where it writes the qualifier with the
+value unknown: such a member is cannot-tell under R05.
+
