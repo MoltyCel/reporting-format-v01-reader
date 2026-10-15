@@ -430,3 +430,21 @@ Claim value: a claim reported satisfied over an empty population, or a
 no-void claim whose value contradicts the void count. No refusal word;
 neither: cannot-tell under R23.
 
+
+## R24 - Roll-up counts that disagree with the records; the counter
+
+Quoted: "An aggregate is computed only over declared, exercised checks"
+(line 343); "Inconclusive and void are exercised checks" (line 348);
+"The counter is disclosure and not rejection." (line 386); "The roll-up
+counts how many verdict records carry their evidence and how many
+reference it" (line 377).
+
+State counts: the reader recounts `declared` (records), each state, and
+`exercised` (pass + fail + inconclusive + void). A roll-up figure that
+differs: no refusal word; neither: cannot-tell under R24.
+
+The carried/referenced counter: settled as not a rejection (line 386).
+What it counts (verdict records, line 377, or observations) is also not
+settled, so the reader neither judges it nor lets it affect a verdict; it
+emits its own recount of carried and referenced observations as data.
+
