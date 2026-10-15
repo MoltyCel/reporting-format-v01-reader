@@ -336,3 +336,18 @@ Taken: a declared `delta.arity` is not read; arity is the number of
 it is the open item of 7.2), so neither a declared arity nor an arity above
 one refuses an object.
 
+
+## R19 - An evidence object missing a slot or an observation
+
+Quoted: "Five slots" (line 152) and the slot list (lines 155-161); "fixed
+named, not implied: checker identity, constraint set, domain" (line 157);
+"two observations from the same pinned checker" (line 141).
+
+moved may be absent: it is recomputed, and row 14 speaks of moved being
+"asserted" (line 296). For a missing `changed`, `fixed`, `compared` or
+`delta`, a `fixed` lacking one of its three names, a `changed` outside its
+three values, or a number of observations other than two: readings
+(a) refused as malformed; (b) not refused, no row reads it.
+
+Neither. Such a member is cannot-tell under R19.
+
