@@ -23,6 +23,7 @@ CITES = {
     "row2": (272, "void with not_applicable, out_of_scope or withheld"),
     "row3": (273, "not-exercised with integrity-failure"),
     "row4": (274, "cause confinement-failed-during-check with any state but void"),
+    "row5": (276, "a declared exclusion with any state but not-exercised"),
 }
 
 # Numbered rows of section 4: citation names "row<n>".
@@ -136,6 +137,8 @@ def read_record(record, name, found):
         found.refuse("row3", "%s is not-exercised with integrity-failure" % name)
     if code == "confinement-failed-during-check" and state != "void":
         found.refuse("row4", "%s is %s with confinement-failed-during-check" % (name, state))
+    if record.get("declared-exclusion") is True and state != "not-exercised":
+        found.refuse("row5", "%s is a declared exclusion in state %s" % (name, state))
 
 
 def judge(member):
