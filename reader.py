@@ -146,6 +146,11 @@ def qualifier(record, field, allowed, cite, name, found):
     return True, value, body
 
 
+def cited(body, run):
+    ref = body.get("ref")
+    return run.evidence.get(ref) if isinstance(ref, str) else None
+
+
 def read_qualifiers(record, name, state, run, found):
     other = qualifier(record, "other-verdict", OTHER_VALUES, "othervalues", name, found)
     disc = qualifier(record, "discrimination", DISCRIMINATION_VALUES, "discvalues", name, found)
@@ -170,6 +175,11 @@ def read_qualifiers(record, name, state, run, found):
             ("other-verdict", other, OTHER_VALUES), ("discrimination", disc, DISCRIMINATION_VALUES)):
         if value in allowed and value != "unknown" and not body.get("ref"):
             found.refuse("row11", "%s: %s %s names no evidence reference" % (name, field, value))
+    for field, body, cite in (("other-verdict", other[2], "othervalues"),
+                              ("discrimination", disc[2], "discvalues")):
+        if "ref" in body and cited(body, run) is None:
+            found.leave_open("R25", cite, "%s: %s cites %s, no evidence object of the report" % (
+                name, field, json.dumps(body["ref"])))
     return other, disc
 
 
