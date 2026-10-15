@@ -20,11 +20,13 @@ CITES = {
     "freetext": (110, "Free text is refused in place of a disposition"),
     "availability": (89, "integrity-failure kept separate from availability-failure."),
     "row1": (271, "a non-verdict state with no cause"),
+    "row2": (272, "void with not_applicable, out_of_scope or withheld"),
 }
 
 # Numbered rows of section 4, keyed by citation name.
 ROW_NUMBER = {
     "row1": 1,
+    "row2": 2,
 }
 
 
@@ -129,6 +131,8 @@ def read_record(record, name, found):
     resting = state in STATES and state not in VERDICT_STATES
     if resting and not has_cause:
         found.refuse("row1", "%s is %s with no cause from the vocabulary" % (name, state))
+    if state == "void" and code in ("not_applicable", "out_of_scope", "withheld"):
+        found.refuse("row2", "%s is void with cause %s" % (name, code))
 
 
 def judge(member):
