@@ -17,6 +17,8 @@ SPEC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec", "v01-tex
 # Each citation: (first line in spec/v01-text.txt, words quoted from there on).
 CITES = {
     "states": (54, "state pass | fail | not-exercised | inconclusive | void"),
+    "freetext": (110, "Free text is refused in place of a disposition"),
+    "availability": (89, "integrity-failure kept separate from availability-failure."),
 }
 
 # Numbered rows of section 4, keyed by citation name.
@@ -90,11 +92,37 @@ def label(record, index):
     return str(record.get("check", "#%d" % index))
 
 
+# 1.2: the eight CAP-1 dispositions, then the values added on the list.
+CAUSES = (
+    "not_applicable", "disabled_by_policy", "unsupported_input",
+    "resource_exhausted", "failed", "unavailable", "out_of_scope", "withheld",
+    "evidence-does-not-hold", "integrity-failure", "precondition-unsatisfiable",
+    "confinement-failed-during-check",
+)
+UNSETTLED_CAUSES = ("availability-failure",)
+
+
+def cause_code(record):
+    """Return (written, code): whether a cause is written, and its value."""
+    if "cause" not in record:
+        return False, None
+    cause = record["cause"]
+    if isinstance(cause, dict):
+        return True, cause.get("code")
+    return True, cause
+
+
 def read_record(record, name, found):
     state = record.get("state")
     if state not in STATES:
         found.leave_open("R25", "states", "%s has state %s, outside the list" % (
             name, json.dumps(state)))
+    written, code = cause_code(record)
+    if written and code in UNSETTLED_CAUSES:
+        found.leave_open("R04", "availability", "%s gives cause %s" % (name, code))
+    elif written and code not in CAUSES:
+        found.refuse("freetext", "%s gives cause %s, not a disposition" % (
+            name, json.dumps(code)))
 
 
 def judge(member):
