@@ -43,6 +43,13 @@ only where the text names it (SHA-256, RFC 6962); where that was not enough,
 the gap is in `reports/OPEN.md`. Every interpretation is in
 `reports/READINGS.md`, and the build log is in `reports/STEPS.md`.
 
+## Known limitations
+
+An outside audit found inputs that the frozen run does not notice, inputs that
+turn a reject into an accept, and five inputs that crash it. They are listed in
+[`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md), with how a caller can see each
+one. They hold against `frozen-run-1` (6d8ee54), which stays unchanged.
+
 ## Layout
 
 - `reader.py` - the reader
@@ -52,6 +59,7 @@ the gap is in `reports/OPEN.md`. Every interpretation is in
 - `reports/STEPS.md` - steps, files opened, decisions
 - `reports/OPEN.md` - what would have needed a source outside the repo
 - `out/` - the recorded run
+- `KNOWN-LIMITATIONS.md` - what the frozen run does not catch, from an outside audit
 
 ## Licence
 
